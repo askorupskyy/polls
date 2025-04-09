@@ -12,6 +12,7 @@ contract PollingApp {
     string title;
     // list of options, max size uint8
     string[] options;
+    // keep track of who votes and what exactly they chose
     mapping(address => uint) votes;
     mapping(address => bool) hasVoted;
     // count the number of results to save on gas and compute times
@@ -53,6 +54,14 @@ contract PollingApp {
     p.votes[msg.sender] = optionId;
     p.hasVoted[msg.sender] = true;
     ++p.results[optionId];
+  }
+
+  function getPolls() external view returns (uint[] memory) {
+    uint[] memory res = new uint[](nextPollId);
+    for (uint i = 0; i < res.length; i++) {
+      res[i] = polls[i].id;
+    }
+    return res;
   }
 
   function getResults(uint pollId) external view returns (uint[] memory) {
