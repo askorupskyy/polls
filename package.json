@@ -7,7 +7,7 @@
     "contract:compile": "hardhat compile",
     "contract:deploy:sepolia": "hardhat run src/deploy.ts --network base_sepolia",
     "contract:deploy": "hardhat run src/deploy.ts --network base",
-    "start:cli": "tsx run src/cli.ts"
+    "start:cli": "tsx src/cli/index.ts"
   },
   "keywords": [],
   "author": "",

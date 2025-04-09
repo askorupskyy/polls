@@ -1,32 +1,8 @@
-import type { PollingApp } from "../dist/types/PollingApp.js";
-
 import prompts from "prompts";
-import assert from "node:assert";
-import dotenv from "dotenv";
 
-import { ethers } from "ethers";
+import { app } from "./contract";
 
-import contractJSON from "../dist/artifacts/src/contracts/PollingApp.sol/PollingApp.json";
-
-dotenv.config();
-
-const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS;
-const PRIVATE_KEY = process.env.PRIVATE_KEY;
-const RPC_URL = process.env.RPC_URL;
-
-assert(CONTRACT_ADDRESS, "CONTRACT_ADDRESS must be present in .env");
-assert(PRIVATE_KEY, "PRIVATE_KEY must be present in .env");
-assert(RPC_URL, "RPC_URL must be present in .env");
-
-const provider = new ethers.JsonRpcProvider(RPC_URL);
-const signer = new ethers.Wallet(PRIVATE_KEY, provider);
-const app = new ethers.Contract(
-  CONTRACT_ADDRESS,
-  contractJSON.abi,
-  signer
-) as unknown as PollingApp;
-
-type Action = "create" | "vote";
+type Action = "create" | "vote" | "results";
 
 const main = async () => {
   const { action }: { action: Action } = await prompts({
@@ -41,6 +17,10 @@ const main = async () => {
       {
         title: "Vote in a poll",
         value: "vote" as Action,
+      },
+      {
+        title: "See results of a poll",
+        value: "results" as Action,
       },
     ],
   });
@@ -91,7 +71,31 @@ const main = async () => {
     console.log(`You voted for ${pollOptions[optionId]}!`);
   }
 
-  // TODO: see results
+  if (action === "results") {
+    const { pollId }: { pollId: number } = await prompts({
+      type: "number",
+      name: "pollId",
+      message: "Please provide a poll ID",
+    });
+
+    const [pollOptions, pollResults] = await Promise.all([
+      app.getOptions(pollId),
+      app.getResults(pollId),
+    ]);
+
+    console.log(`............Poll results............`);
+    for (const i in pollOptions) {
+      console.log(`${pollOptions[i]} >> \t${pollResults[i]} votes`);
+    }
+    console.log(`.....................................`);
+  }
 };
 
-main();
+main().catch((err: { code?: string; reason?: string }) => {
+  if ("code" in err) {
+    console.log("Execution failed >>", err.reason);
+    return;
+  }
+
+  throw err;
+});
