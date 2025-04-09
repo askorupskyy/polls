@@ -66,6 +66,32 @@ const main = async () => {
 
     console.log("Poll created!");
   }
+
+  if (action === "vote") {
+    const { pollId }: { pollId: number } = await prompts({
+      type: "number",
+      name: "pollId",
+      message: "Please provide a poll ID",
+    });
+
+    const pollOptions = await app.getOptions(pollId);
+
+    const { optionId }: { optionId: number } = await prompts({
+      type: "select",
+      name: "optionId",
+      message: "Select an option you'd like to vote for",
+      choices: pollOptions.map((option, i) => ({
+        title: option,
+        value: i,
+      })),
+    });
+
+    await app.vote(pollId, optionId);
+
+    console.log(`You voted for ${pollOptions[optionId]}!`);
+  }
+
+  // TODO: see results
 };
 
 main();

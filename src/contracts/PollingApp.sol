@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >= 0.8.28 < 0.8.30;
+pragma solidity = 0.8.28;
 
 /// @title Polling App
 /// @author askorupskyy
@@ -14,6 +14,7 @@ contract PollingApp {
         string[] options;
 
         mapping(address => uint) votes;
+        mapping(address => bool) hasVoted;
         // count the number of results to save on gas and compute times
         mapping(uint => uint) results;
 
@@ -32,6 +33,7 @@ contract PollingApp {
         p.title = title;
         p.options = options;
         p.author = msg.sender;
+        p.active = true;
 
         nextPollId++;
     }
@@ -42,7 +44,10 @@ contract PollingApp {
         require(p.id == pollId, "Invalid pollId, such poll does not exist");
         require(p.options.length > optionId, "Invalid optionId, such options does not exist");
 
+        require(!p.hasVoted[msg.sender], "The sender has already voted");
+
         p.votes[msg.sender] = optionId;
+        p.hasVoted[msg.sender] = true;
         ++p.results[optionId];
     }
 
@@ -56,5 +61,9 @@ contract PollingApp {
             res[i] = p.results[i];
         }
         return res;
+    }
+
+    function getOptions(uint pollId) public view returns (string[] memory) {
+        return polls[pollId].options;
     }
 }
