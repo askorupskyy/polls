@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity "0.8.29";
+pragma solidity >= 0.8.28 < 0.8.30;
 
 /// @title Polling App
 /// @author askorupskyy
 /// @notice Polling app where a user can create polls and have others vote
-/// @dev 
+/// @dev
 contract PollingApp {
     struct Poll {
         // id of the poll
@@ -22,7 +22,7 @@ contract PollingApp {
     }
 
     uint public nextPollId;
-    mapping (uint => Poll) polls;
+    mapping (uint => Poll) public polls;
 
     function createPoll(string memory title, string[] memory options) external {
         require(options.length >= 2, "At least 2 options are required to make a poll");
