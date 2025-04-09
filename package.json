@@ -3,7 +3,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "contract:compile": "hardhat compile",
+    "contract:deploy:sepolia": "hardhat run src/deploy.ts --network base_sepolia",
+    "contract:deploy": "hardhat run src/deploy.ts --network base",
+    "start:cli": "tsx run src/cli.ts"
   },
   "keywords": [],
   "author": "",
