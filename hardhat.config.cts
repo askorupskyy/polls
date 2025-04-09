@@ -24,6 +24,11 @@ export default {
       url: "https://sepolia.base.org",
       accounts: [PRIVATE_KEY],
     },
+    base: {
+      url: "https://mainnet.base.org",
+      // TODO: sort something out with .env for multiple networks
+      accounts: [PRIVATE_KEY],
+    },
   },
   paths: {
     sources: "./src/contracts",
