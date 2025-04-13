@@ -1,10 +1,13 @@
 import prompts from "prompts";
 
 import { app } from "./contract";
+import { promptPoll } from "./prompts";
 
 type Action = "create" | "vote" | "results";
 
 const main = async () => {
+  const polls = await app.getPolls();
+
   const { action }: { action: Action } = await prompts({
     name: "action",
     type: "select",
@@ -48,11 +51,7 @@ const main = async () => {
   }
 
   if (action === "vote") {
-    const { pollId }: { pollId: number } = await prompts({
-      type: "number",
-      name: "pollId",
-      message: "Please provide a poll ID",
-    });
+    const { pollId } = await promptPoll(polls);
 
     const pollOptions = await app.getOptions(pollId);
 
@@ -72,11 +71,7 @@ const main = async () => {
   }
 
   if (action === "results") {
-    const { pollId }: { pollId: number } = await prompts({
-      type: "number",
-      name: "pollId",
-      message: "Please provide a poll ID",
-    });
+    const { pollId } = await promptPoll(polls);
 
     const [pollOptions, pollResults] = await Promise.all([
       app.getOptions(pollId),

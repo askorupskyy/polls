@@ -19,12 +19,18 @@ contract PollingApp {
     mapping(uint => uint) results;
     address author;
     bool active;
+    // state the expiry date so we can't vote after a certain datetime
+    uint expiry;
   }
 
   uint public nextPollId;
   mapping(uint => Poll) public polls;
 
-  function createPoll(string memory title, string[] memory options) external {
+  function createPoll(
+    string memory title,
+    string[] memory options,
+    uint expiry
+  ) external {
     require(
       options.length >= 2,
       "At least 2 options are required to make a poll"
@@ -36,12 +42,17 @@ contract PollingApp {
     p.options = options;
     p.author = msg.sender;
     p.active = true;
+    p.expiry = expiry;
 
     nextPollId++;
   }
 
   function vote(uint pollId, uint8 optionId) external {
     Poll storage p = polls[pollId];
+    require(
+      p.expiry <= block.timestamp,
+      "Current poll has expired, you can only view the results"
+    );
     // in solidity, when we try to retrieve a `mapping`, it defaults to the default state of such mapping = { id: 0, title: "", ... }
     require(p.id == pollId, "Invalid pollId, such poll does not exist");
     require(
@@ -56,10 +67,10 @@ contract PollingApp {
     ++p.results[optionId];
   }
 
-  function getPolls() external view returns (uint[] memory) {
-    uint[] memory res = new uint[](nextPollId);
+  function getPolls() external view returns (string[] memory) {
+    string[] memory res = new string[](nextPollId);
     for (uint i = 0; i < res.length; i++) {
-      res[i] = polls[i].id;
+      res[i] = polls[i].title;
     }
     return res;
   }
@@ -78,5 +89,10 @@ contract PollingApp {
 
   function getOptions(uint pollId) public view returns (string[] memory) {
     return polls[pollId].options;
+  }
+
+  function updatePoll(uint pollId, bool active) public {
+    Poll storage p = polls[pollId];
+    p.active = active;
   }
 }
